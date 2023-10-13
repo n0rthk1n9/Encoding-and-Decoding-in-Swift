@@ -31,14 +31,38 @@ let encoder = JSONEncoder()
 let decoder = JSONDecoder()
 
 struct Toy: Encodable {
-  var name: String
-  var label: String
-  
-  enum CodingKeys: CodingKey {
-    case name, label
-  }
+    var name: String
+    var label: String
+
+    enum CodingKeys: CodingKey {
+        case name, label
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(name, forKey: .name)
+        var labelContainer = container.nestedUnkeyedContainer(forKey: .label)
+        try labelContainer.encode(name.lowercased())
+        try labelContainer.encode(name.uppercased())
+        try labelContainer.encode(name)
+    }
 }
 
 let toy = Toy(name: "Teddy Bear", label: "Teddy Bear")
 let data = try encoder.encode(toy)
 let string = String(data: data, encoding: .utf8)!
+
+extension Toy: Decodable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        name = try container.decode(String.self, forKey: .name)
+        var labelContainer = try container.nestedUnkeyedContainer(forKey: .label)
+        var labelName = ""
+        while !labelContainer.isAtEnd {
+            labelName = try labelContainer.decode(String.self)
+        }
+        label = labelName
+    }
+}
+
+let sameToy = try decoder.decode(Toy.self, from: data)
