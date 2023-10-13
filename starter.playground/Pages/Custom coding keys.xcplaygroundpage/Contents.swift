@@ -28,13 +28,17 @@
 import Foundation
 
 struct Toy: Codable {
-  var name: String
+    var name: String
 }
 
 struct Employee: Codable {
-  var name: String
-  var id: Int
-  var favoriteToy: Toy
+    var name: String
+    var id: Int
+    var favoriteToy: Toy
+
+    enum CodingKeys: String, CodingKey {
+        case name, id, favoriteToy = "gift"
+    }
 }
 
 let toy = Toy(name: "Teddy Bear")
